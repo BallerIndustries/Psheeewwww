@@ -1,40 +1,37 @@
 <html>
 <canvas id="canvas" width="800" height="900"></canvas>
 <script type="text/javascript">
-    const LEFT = 760;
-    const RIGHT = 40;
+    const RIGHT = 760;
+    const LEFT = 40;
 
     const points = [
         generateJurLinePath(800),
         generateJurLinePath(760),
         generateJurLinePath(720),
-
         generateJurLinePath(680),
         generateJurLinePath(640),
         generateJurLinePath(600),
-
         generateJurLinePath(560),
         generateJurLinePath(520),
-
         generateJurLinePath(480),
         generateJurLinePath(440),
         generateJurLinePath(400),
-
         generateJurLinePath(360),
         generateJurLinePath(320),
         generateJurLinePath(280)
     ].flat();
 
-    let counter = -1;
+    let counter = 1;
+    let wipeOutCounter = 0;
 
     function generateJurLinePath(y) {
         return [
-            generateAnimatedLinePath(LEFT, y, RIGHT), 'BREAK',
-            generateAnimatedLinePath(RIGHT, y - 20, LEFT), 'BREAK'].flat()
+            generateAnimatedLinePath(RIGHT, y, LEFT), 'BREAK',
+            generateAnimatedLinePath(LEFT, y - 20, RIGHT), 'BREAK'].flat()
     }
 
     function generateAnimatedLinePath(x1, y1, x2) {
-        const pieces = 4;
+        const pieces = 6;
         const delta = (x2 - x1) / pieces;
         const buffer = [];
 
@@ -45,31 +42,57 @@
         return buffer;
     }
 
-    function init() {
-        update();
-    }
-
     function update() {
-        draw();
+        const barsAreDrawn = drawBars();
+
+        if (barsAreDrawn) {
+            wipeOutBars();
+        }
+
         window.requestAnimationFrame(update);
     }
 
-    function draw() {
+    function writeText(maxWidth) {
+        const text = "Superfly";
+        const context = document.getElementById("canvas").getContext("2d");
+
+        context.font = "38px Arial";
+        context.fillStyle = "#949796";
+
+        const textWidth = context.measureText(text).width;
+        const textStartX = (800 - textWidth) / 2;
+
+        for (let i = text.length; i > 0; i--) {
+            const slicedText = text.substr(0, i);
+            console.log(slicedText);
+            const textEndX = textStartX + context.measureText(slicedText).width;
+
+            if (textEndX < maxWidth) {
+                context.fillText(slicedText, textStartX, 730);
+                break;
+            }
+        }
+    }
+
+    function wipeOutBars() {
+        wipeOutCounter++;
+
+        const duration = 50.0;
         const canvas = document.getElementById("canvas");
         const context = canvas.getContext("2d");
+        const percentage = Math.min(wipeOutCounter, 100.0) / duration;
+        const width = canvas.width * percentage;
 
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillRect(0, 690, width, 60);
+        writeText(width);
 
+        return wipeOutCounter > duration;
+    }
+
+    function drawBars() {
         counter++;
 
-        if (counter < 2) {
-            return;
-        }
-
-        // Draw a line
-        context.beginPath();
-
+        const context = setupContext();
         const first = points[0];
         context.moveTo(first.x, first.y);
 
@@ -95,23 +118,24 @@
             }
         }
 
+        context.strokeStyle = '#949796';
+        context.lineWidth = 10;
+        context.stroke();
 
-        // points.slice(1, counter).forEach(command => {
-        //     if (command === 'BREAK') {
-        //         context.strokeStyle = '#949796';
-        //         context.lineWidth = 10;
-        //         context.stroke();
-        //     }
-        //
-        //
-        //
-        //
-        //     context.lineTo(command.x, command.y);
-        // });
-
-
+        return counter >= points.length;
     }
 
-    init();
+    function setupContext() {
+        const canvas = document.getElementById("canvas");
+        const context = canvas.getContext("2d");
+        context.fillStyle = "black";
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.beginPath();
+        return context;
+    }
+
+    update();
 </script>
 </html>
