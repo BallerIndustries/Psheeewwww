@@ -1,4 +1,10 @@
 <html>
+
+<!--<audio id="audio">-->
+    <!--<source src="/dong.mp3" type="audio/mp3">-->
+<!--</audio>-->
+<!---->
+
 <canvas id="canvas" width="800" height="900"></canvas>
 <script type="text/javascript">
     const RIGHT = 760;
@@ -31,7 +37,7 @@
     }
 
     function generateAnimatedLinePath(x1, y1, x2) {
-        const pieces = 6;
+        const pieces = 4;
         const delta = (x2 - x1) / pieces;
         const buffer = [];
 
@@ -136,6 +142,13 @@
         return context;
     }
 
+    function playDongSound() {
+        const horse = new Audio('dong.mp3');
+        horse.loop = true;
+        horse.play();
+    }
+
     update();
+    playDongSound();
 </script>
 </html>
